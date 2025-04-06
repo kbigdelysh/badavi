@@ -2,6 +2,8 @@
 
 A tool that converts a collection of markdown files (with interlinking URLs) into a minimalistic static website using Pandoc.
 
+*("Badavi" [بدوی] means "primitive", "barebone", or "minimalistic" in Persian.)*
+
 ## Features
 
 *   Recursively processes Markdown files (`.md`) in an input directory.
