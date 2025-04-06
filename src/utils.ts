@@ -1,0 +1,98 @@
+import { exec, execFile } from 'child_process';
+import fs from 'fs-extra';
+import path from 'path';
+import { BadaviConfig } from './types.js';
+
+// Default configuration values
+const DEFAULT_CONFIG: BadaviConfig = {
+    defaultLanguage: 'en',
+    defaultDirection: 'ltr',
+};
+
+/**
+ * Checks if Pandoc is installed and accessible in the system's PATH.
+ * @returns {Promise<boolean>} True if Pandoc is found, false otherwise.
+ */
+export const checkPandoc = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+        exec('pandoc --version', (error, stdout, stderr) => {
+            if (error) {
+                // Error executing command (e.g., command not found)
+                console.error('Error checking Pandoc:', error.message);
+                if (stderr) {
+                    console.error('Pandoc stderr:', stderr);
+                }
+                resolve(false);
+            } else {
+                // Command executed successfully
+                console.log('Pandoc found:', stdout.split('\n')[0]); // Log the first line of version info
+                resolve(true);
+            }
+        });
+    });
+};
+
+/**
+ * Loads configuration from a specified path or badavi-config.json in the CWD.
+ * Falls back to defaults if the file doesn't exist or is invalid.
+ * @param {string | undefined} configPathOverride Optional path to the config file.
+ * @returns {Promise<BadaviConfig>} The loaded or default configuration.
+ */
+export const loadConfig = async (configPathOverride?: string): Promise<BadaviConfig> => {
+    const configPath = configPathOverride
+        ? path.resolve(configPathOverride) // Use override if provided
+        : path.resolve(process.cwd(), 'badavi-config.json'); // Default to CWD
+
+    let userConfig: Partial<BadaviConfig> = {};
+
+    try {
+        if (await fs.pathExists(configPath)) {
+            const configContent = await fs.readFile(configPath, 'utf8');
+            userConfig = JSON.parse(configContent);
+            console.log(`Loaded configuration from ${configPath}`);
+        } else {
+            // Only log "not found" if the default path was used and it doesn't exist.
+            // If an override path was given and it doesn't exist, it's more like an error.
+            if (!configPathOverride) {
+                console.log('Default badavi-config.json not found in CWD, using default settings.');
+            } else {
+                 // Throw an error if a specific config path was provided but not found
+                 throw new Error(`Configuration file not found at specified path: ${configPath}`);
+            }
+        }
+    } catch (error: any) {
+        // If it's the specific error we threw, re-throw it.
+        if (error.message.startsWith('Configuration file not found')) {
+            throw error;
+        }
+        // Otherwise, log a warning and use defaults
+        console.warn(`Warning: Could not read or parse ${configPath}. Using default settings.`, error.message);
+        userConfig = {}; // Reset user config on parse error
+    }
+
+    // Merge defaults with user config
+    const finalConfig: BadaviConfig = {
+        ...DEFAULT_CONFIG,
+        ...userConfig,
+    };
+
+    // Validate config structure slightly (can be expanded)
+    if (typeof finalConfig.defaultLanguage !== 'string') {
+        console.warn('Warning: Invalid defaultLanguage in config, using default.');
+        finalConfig.defaultLanguage = DEFAULT_CONFIG.defaultLanguage;
+    }
+    if (!['ltr', 'rtl'].includes(finalConfig.defaultDirection)) {
+        console.warn('Warning: Invalid defaultDirection in config, using default.');
+        finalConfig.defaultDirection = DEFAULT_CONFIG.defaultDirection;
+    }
+    if (finalConfig.cssPath && typeof finalConfig.cssPath !== 'string') {
+        console.warn('Warning: Invalid cssPath in config, ignoring.');
+        delete finalConfig.cssPath;
+    }
+     if (finalConfig.pandocArgs && !Array.isArray(finalConfig.pandocArgs)) {
+        console.warn('Warning: Invalid pandocArgs in config (must be an array), ignoring.');
+        delete finalConfig.pandocArgs;
+    }
+
+    return finalConfig;
+}; 
