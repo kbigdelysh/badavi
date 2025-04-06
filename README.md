@@ -90,16 +90,25 @@ You can configure Badavi by:
 1.  Creating a `badavi-config.json` file in the directory where you run the command.
 2.  Using the `-c` or `--config` option to specify the path to a configuration file.
 
-Create a `badavi-config.json` file in the directory where you *run* the `badavi` command to customize its behavior:
+Example `badavi-config.json`:
 
 ```json
 {
-  "defaultLanguage": "en",        // Fallback language code (e.g., "en", "fa")
-  "defaultDirection": "ltr",       // Fallback text direction ("ltr" or "rtl")
-  "cssPath": "path/to/style.css", // Optional: Relative path to a CSS file to include
-  "pandocArgs": ["--toc"]        // Optional: Array of extra arguments for Pandoc
+  "defaultLanguage": "en",
+  "defaultDirection": "ltr",
+  "cssPath": "styles/main.css",
+  "pandocArgs": ["--toc"],
+  "pandocPath": "C:/Program Files/Pandoc/pandoc.exe"
 }
 ```
+
+**Configuration Options:**
+
+*   `defaultLanguage` (string, required): Fallback language code (e.g., "en", "fa") used if detection fails.
+*   `defaultDirection` ('ltr' | 'rtl', required): Fallback text direction used if detection fails.
+*   `cssPath` (string, optional): Relative path (from where you run `badavi`) to a CSS file to include in the HTML `<head>`.
+*   `pandocArgs` (string[], optional): An array of extra command-line arguments to pass directly to Pandoc (e.g., `["--toc", "--mathjax"]`).
+*   `pandocPath` (string, optional): The full, absolute path to the `pandoc` executable (e.g., `"C:/Program Files/Pandoc/pandoc.exe"` or `"/usr/local/bin/pandoc"`). This is particularly useful on systems (like Windows) where the Pandoc installation directory might not be included in the `PATH` environment variable available to Node.js processes, even if it's available in your interactive terminal.
 
 ## Running Tests
 

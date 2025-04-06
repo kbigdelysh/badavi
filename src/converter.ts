@@ -47,13 +47,15 @@ const findMarkdownFiles = async (dir: string): Promise<string[]> => {
  * @param config The application configuration.
  * @param inputDir The root input directory (for link path calculations).
  * @param outputDir The root output directory (for link path calculations).
+ * @param pandocPath Optional path to the Pandoc executable from config.
  */
 const convertMarkdownFile = async (
     inputFile: string,
     outputFile: string,
     config: BadaviConfig,
     inputDir: string,
-    outputDir: string
+    outputDir: string,
+    pandocPath?: string
 ): Promise<void> => {
     const relativeInputPath = path.relative(process.cwd(), inputFile);
     const relativeOutputPath = path.relative(process.cwd(), outputFile);
@@ -109,18 +111,22 @@ const convertMarkdownFile = async (
         // Input and Output files
         pandocArgs.push(inputFile, '--output', outputFile);
 
+        // Determine the command to execute
+        const pandocCommand = pandocPath || 'pandoc';
+
         // 4. Execute Pandoc
         await new Promise<void>((resolve, reject) => {
-            execFile('pandoc', pandocArgs, (error, stdout, stderr) => {
+            // Use the specific command/path
+            execFile(pandocCommand, pandocArgs, (error, stdout, stderr) => {
                 if (error) {
-                    console.error(` -> Pandoc error converting ${relativeInputPath}:`, error.message);
+                    // Error logging remains mostly the same, but mention the command used
+                    console.error(` -> Pandoc error converting ${relativeInputPath} using \"${pandocCommand}\":`, error.message);
                     if (stderr) {
                         console.error(' -> Pandoc stderr:', stderr);
                     }
-                     if (stdout) { // Pandoc might output info/warnings to stdout on error
+                     if (stdout) {
                         console.error(' -> Pandoc stdout:', stdout);
                     }
-                    // Reject the promise to signal failure for this file
                     reject(new Error(`Pandoc conversion failed for ${relativeInputPath}`));
                     return;
                 }
@@ -169,7 +175,8 @@ ${stderr}`);
 export const processFiles = async (
     inputDir: string,
     outputDir: string,
-    config: BadaviConfig
+    config: BadaviConfig,
+    pandocPath?: string
 ): Promise<void> => {
     console.log(`Starting file processing from ${inputDir} to ${outputDir}...`);
     try {
@@ -192,7 +199,8 @@ export const processFiles = async (
             // Ensure the specific output directory for the file exists
             await fs.ensureDir(outputDirPath);
 
-            await convertMarkdownFile(inputFile, outputFile, config, inputDir, outputDir);
+            // Pass pandocPath down to convertMarkdownFile
+            await convertMarkdownFile(inputFile, outputFile, config, inputDir, outputDir, pandocPath);
         }
 
         console.log('File processing completed.');

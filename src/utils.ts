@@ -10,23 +10,48 @@ const DEFAULT_CONFIG: BadaviConfig = {
 };
 
 /**
- * Checks if Pandoc is installed and accessible in the system's PATH.
+ * Checks if Pandoc is installed and accessible, either via PATH or a specified path.
+ * @param {string | undefined} pandocPath Optional path to the Pandoc executable.
  * @returns {Promise<boolean>} True if Pandoc is found, false otherwise.
  */
-export const checkPandoc = (): Promise<boolean> => {
+export const checkPandoc = (pandocPath?: string): Promise<boolean> => {
+    // Determine the command/path to execute
+    const command = pandocPath || 'pandoc';
+    const isExplicitPath = !!pandocPath;
+
     return new Promise((resolve) => {
-        exec('pandoc --version', (error, stdout, stderr) => {
-            if (error) {
-                // Error executing command (e.g., command not found)
-                console.error('Error checking Pandoc:', error.message);
+        // Use execFile if it's an explicit path, otherwise exec (for PATH lookup)
+        const process = isExplicitPath
+            ? execFile(command, ['--version'])
+            : exec(command + ' --version');
+
+        process.on('error', (error) => {
+            console.error(`Error executing ${command}:`, error.message);
+            resolve(false);
+        });
+
+        let stdout = '';
+        let stderr = '';
+        if (process.stdout) {
+            process.stdout.on('data', (data) => stdout += data);
+        }
+        if (process.stderr) {
+            process.stderr.on('data', (data) => stderr += data);
+        }
+
+        process.on('close', (code) => {
+            if (code === 0) {
+                console.log(`Pandoc found (${isExplicitPath ? 'at specified path' : 'via PATH'}): ${stdout.split(/\r?\n/)[0]}`);
+                resolve(true);
+            } else {
+                console.error(`Error checking Pandoc (${isExplicitPath ? 'at specified path' : 'via PATH'}). Exit code: ${code}`);
                 if (stderr) {
-                    console.error('Pandoc stderr:', stderr);
+                    console.error('Pandoc stderr:', stderr.trim());
+                }
+                 if (stdout) { // Log stdout too, might contain info
+                    console.error('Pandoc stdout:', stdout.trim());
                 }
                 resolve(false);
-            } else {
-                // Command executed successfully
-                console.log('Pandoc found:', stdout.split('\n')[0]); // Log the first line of version info
-                resolve(true);
             }
         });
     });
@@ -89,9 +114,14 @@ export const loadConfig = async (configPathOverride?: string): Promise<BadaviCon
         console.warn('Warning: Invalid cssPath in config, ignoring.');
         delete finalConfig.cssPath;
     }
-     if (finalConfig.pandocArgs && !Array.isArray(finalConfig.pandocArgs)) {
+    if (finalConfig.pandocArgs && !Array.isArray(finalConfig.pandocArgs)) {
         console.warn('Warning: Invalid pandocArgs in config (must be an array), ignoring.');
         delete finalConfig.pandocArgs;
+    }
+    // Add validation for pandocPath
+    if (finalConfig.pandocPath && typeof finalConfig.pandocPath !== 'string') {
+        console.warn('Warning: Invalid pandocPath in config (must be a string), ignoring.');
+        delete finalConfig.pandocPath;
     }
 
     return finalConfig;

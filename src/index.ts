@@ -64,25 +64,26 @@ program
         }
 
         try {
-            // 1. Check Pandoc
-            const pandocExists = await checkPandoc();
+            // 1. Load config (BEFORE pandoc check)
+            const config: BadaviConfig = await loadConfig(configPath);
+            console.log('Using configuration:', config);
+
+            // 2. Check Pandoc (pass optional path from config)
+            const pandocExists = await checkPandoc(config.pandocPath);
             if (!pandocExists) {
                 console.error(`
-Error: Pandoc not found in your system PATH.
+Error: Pandoc not found via PATH${config.pandocPath ? ` or at specified path: ${config.pandocPath}` : ''}.
 Pandoc is required to convert Markdown files.
 
-Please install Pandoc from https://pandoc.org/installing.html and ensure it's added to your PATH.
+Please install Pandoc from https://pandoc.org/installing.html and ensure it's added to your PATH,
+or provide the full path to the executable in your badavi-config.json using the \"pandocPath\" key.
 `);
                 process.exit(1);
             }
 
-            // 2. Load config
-            const config: BadaviConfig = await loadConfig(configPath);
-            console.log('Using configuration:', config);
-
-            // 3. Process files
+            // 3. Process files (pass optional path from config)
             console.log('Starting conversion process...');
-            await processFiles(resolvedInput, resolvedOutput, config);
+            await processFiles(resolvedInput, resolvedOutput, config, config.pandocPath);
             console.log('Conversion process finished successfully.');
 
         } catch (error) {
