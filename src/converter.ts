@@ -16,28 +16,27 @@ const languageMap: { [key: string]: { tag: string; rtl: boolean } } = {
 };
 
 /**
- * Recursively finds all Markdown files (.md) within a directory.
+ * Recursively finds all files within a directory.
  * @param dir The directory to search in.
  * @returns {Promise<string[]>} A promise that resolves with an array of absolute file paths.
  */
-const findMarkdownFiles = async (dir: string): Promise<string[]> => {
-    let markdownFiles: string[] = [];
+const findAllFiles = async (dir: string): Promise<string[]> => {
+    let files: string[] = [];
     try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
         for (const entry of entries) {
             const fullPath = path.resolve(dir, entry.name);
             if (entry.isDirectory()) {
-                markdownFiles = markdownFiles.concat(await findMarkdownFiles(fullPath));
-            } else if (entry.isFile() && path.extname(entry.name).toLowerCase() === '.md') {
-                markdownFiles.push(fullPath);
+                files = files.concat(await findAllFiles(fullPath)); // Recurse
+            } else if (entry.isFile()) {
+                files.push(fullPath); // Add all files
             }
         }
     } catch (error) {
         console.error(`Error reading directory ${dir}:`, error);
-        // Propagate the error or handle it as needed
         throw error;
     }
-    return markdownFiles;
+    return files;
 };
 
 /**
@@ -180,35 +179,56 @@ export const processFiles = async (
 ): Promise<void> => {
     console.log(`Starting file processing from ${inputDir} to ${outputDir}...`);
     try {
-        const markdownFiles = await findMarkdownFiles(inputDir);
+        const allFiles = await findAllFiles(inputDir);
 
-        if (markdownFiles.length === 0) {
-            console.warn(`No Markdown (.md) files found in ${inputDir}.`);
+        if (allFiles.length === 0) {
+            console.warn(`No files found in ${inputDir}.`);
             return;
         }
 
-        console.log(`Found ${markdownFiles.length} Markdown file(s).`);
+        console.log(`Found ${allFiles.length} file(s) to process.`);
 
         await fs.ensureDir(outputDir); // Ensure the root output directory exists
 
-        for (const inputFile of markdownFiles) {
+        for (const inputFile of allFiles) {
             const relativePath = path.relative(inputDir, inputFile);
-            const outputFile = path.resolve(outputDir, relativePath.replace(/\.md$/i, '.html'));
+            // Determine output path - same relative structure
+            const outputFile = path.resolve(outputDir, relativePath);
             const outputDirPath = path.dirname(outputFile);
 
             // Ensure the specific output directory for the file exists
             await fs.ensureDir(outputDirPath);
 
-            // Pass pandocPath down to convertMarkdownFile
-            await convertMarkdownFile(inputFile, outputFile, config, inputDir, outputDir, pandocPath);
+            // Check if it's a Markdown file
+            if (path.extname(inputFile).toLowerCase() === '.md') {
+                // It's Markdown -> Convert
+                const htmlOutputFile = outputFile.replace(/\.md$/i, '.html');
+                try {
+                    await convertMarkdownFile(inputFile, htmlOutputFile, config, inputDir, outputDir, pandocPath);
+                } catch (error) {
+                    console.error(`-> Failed to convert ${relativePath}. Skipping file.`);
+                    // Optionally continue to next file or re-throw to stop everything
+                    // continue;
+                }
+            } else {
+                // It's some other file -> Copy directly
+                try {
+                    await fs.copy(inputFile, outputFile);
+                    const relativeInputPath = path.relative(process.cwd(), inputFile);
+                    const relativeOutputPath = path.relative(process.cwd(), outputFile);
+                    console.log(`Copied ${relativeInputPath} to ${relativeOutputPath}`);
+                } catch (error) {
+                    console.error(`-> Failed to copy ${relativePath}. Skipping file. Error:`, error);
+                    // Optionally continue or re-throw
+                    // continue;
+                }
+            }
         }
 
         console.log('File processing completed.');
 
     } catch (error) {
         console.error('Error during file processing:', error);
-        // Decide if the whole process should stop or just log the error
-        // For now, let's re-throw to stop the process
         throw error;
     }
 }; 
