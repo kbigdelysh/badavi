@@ -64,19 +64,34 @@ const convertMarkdownFile = async (
         // 1. Read File Content
         const mdContent = await fs.readFile(inputFile, 'utf8');
 
-        // 2. Detect Language and Direction
-        // franc needs a minimum amount of text for reliable detection
-        const langCode = franc(mdContent, { minLength: 10 });
-        let langTag = config.defaultLanguage;
-        let direction = config.defaultDirection;
+        // 2. Detect Language and Direction (REVISED LOGIC)
+        const langCode = franc(mdContent, { minLength: 10 }); // ISO 639-3 code
+        let langTag: string;
+        let direction: 'ltr' | 'rtl';
+        let detectionSource: string;
 
-        if (langCode !== 'und' && languageMap[langCode]) {
-            langTag = languageMap[langCode].tag;
-            direction = languageMap[langCode].rtl ? 'rtl' : 'ltr';
-            console.log(` -> Detected language: ${langTag} (${direction.toUpperCase()})`);
+        if (langCode === 'und') {
+            // Undetermined: Use defaults from config
+            langTag = config.defaultLanguage;
+            direction = config.defaultDirection;
+            detectionSource = 'default (undetermined)';
         } else {
-            console.log(` -> Using default language: ${langTag} (${direction.toUpperCase()})`);
+            // Determined: Check if it's a known (RTL) language in our map
+            if (languageMap[langCode]) {
+                langTag = languageMap[langCode].tag;
+                direction = languageMap[langCode].rtl ? 'rtl' : 'ltr';
+                detectionSource = `detected (${langCode} -> ${langTag})`;
+            } else {
+                // Detected, but not in our RTL map -> assume LTR
+                // Use the 3-letter code directly or map common ones if needed
+                // Simple approach: map 'eng' to 'en', otherwise use the code
+                langTag = (langCode === 'eng') ? 'en' : langCode;
+                direction = 'ltr'; // Assume LTR if not in our RTL map
+                detectionSource = `detected (${langCode} -> ${langTag})`;
+            }
         }
+
+        console.log(` -> Language: ${langTag} (${direction.toUpperCase()}) [Source: ${detectionSource}]`);
 
         // 3. Build Pandoc Arguments
         const pandocArgs: string[] = [
