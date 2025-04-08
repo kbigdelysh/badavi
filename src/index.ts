@@ -65,7 +65,7 @@ program
 
         try {
             // 1. Load config (BEFORE pandoc check)
-            const config: BadaviConfig = await loadConfig(configPath);
+            const config: BadaviConfig = await loadConfig(resolvedInput, configPath);
             console.log('Using configuration:', config);
 
             // 2. Check Pandoc (pass optional path from config)
