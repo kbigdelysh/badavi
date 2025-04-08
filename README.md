@@ -108,7 +108,7 @@ Example `badavi-config.json`:
 }
 ```
 
-**Note:** In the example above, you should remove the comments before using the `badavi-config.json` file. I have provided an example badavi-config.json file in the root of the repository named `badavi-config.json.example`.
+**Note:** In the example above, you should remove the comments before using the `badavi-config.json` file. I have provided an example in the root of the repository named `badavi-config.json.example`.
 
 **Configuration Options:**
 
