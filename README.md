@@ -1,6 +1,6 @@
 # badavi
 
-A tool that converts a collection of markdown files (with interlinking URLs) into a minimalistic static website using Pandoc.
+A tool that converts a collection of markdown files (with interlinking URLs) into a minimalistic static website.
 
 *("Badavi" [بدوی] means "primitive", "barebone", or "minimalistic" in Persian.)*
 
@@ -97,10 +97,10 @@ Example `badavi-config.json`:
 
 ```json
 {
-  "defaultLanguage": "en",
-  "defaultDirection": "ltr",
-  "cssPath": "styles/main.css",
-  "pandocPath": "C:/Program Files/Pandoc/pandoc.exe"
+  "defaultLanguage": "en", // For Persian, use "fa", for Arabic, use "ar".
+  "defaultDirection": "ltr", // "ltr" for left-to-right, "rtl" for right-to-left.
+  "cssPath": "styles/main.css", // Path to a CSS file to include in the HTML `<head>`.
+  "pandocPath": "C:/Program Files/Pandoc/pandoc.exe" // Path to the Pandoc executable.
 }
 ```
 
