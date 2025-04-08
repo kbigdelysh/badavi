@@ -1,4 +1,4 @@
-# badavi
+# Badavi
 
 A tool that converts a collection of markdown files (with interlinking URLs) into a minimalistic static website.
 
@@ -8,9 +8,9 @@ A tool that converts a collection of markdown files (with interlinking URLs) int
 
 * Properly converts markdown in left-to-right (LTR) and right-to-left (RTL) languages to HTML.
 * Detects language (e.g., Persian, Arabic) to set appropriate `lang` and `dir="rtl"` attributes in HTML.
+* 
 
 ## Prerequisites
-
 * [Node.js](https://nodejs.org/) (Version 16 or higher recommended for full ES Module support)
 * [Pandoc](https://pandoc.org/installing.html) (must be installed and accessible in your system's PATH)
 
@@ -28,6 +28,10 @@ A tool that converts a collection of markdown files (with interlinking URLs) int
     ```bash
     npm install
     ```
+
+## Input File Requirements
+
+* **Linking:** If your markdown files have interlinking URLs, their links **must** be relative to each file's location for the conversion to work correctly. For example, if a file is located in `./source-docs/chapter1/section1.md` and the second file is located in `./source-docs/chapter2/section2.md`, the link to the second file from the first file should be `../chapter2/section2.md`.
 
 ## Building the Project
 
