@@ -5,7 +5,7 @@ import { BadaviConfig } from './types.js';
 
 // Default configuration values
 const DEFAULT_CONFIG: BadaviConfig = {
-    defaultLanguage: 'en',
+    defaultLanguageCodeIso639_2letter: 'en',
     defaultDirection: 'ltr',
 };
 
@@ -58,15 +58,16 @@ export const checkPandoc = (pandocPath?: string): Promise<boolean> => {
 };
 
 /**
- * Loads configuration from a specified path or badavi-config.json in the CWD.
+ * Loads configuration from a specified path or badavi-config.json in the input directory.
  * Falls back to defaults if the file doesn't exist or is invalid.
- * @param {string | undefined} configPathOverride Optional path to the config file.
+ * @param {string} inputDir The resolved path to the input directory.
+ * @param {string | undefined} configPathOverride Optional path to the config file (from --config option).
  * @returns {Promise<BadaviConfig>} The loaded or default configuration.
  */
-export const loadConfig = async (configPathOverride?: string): Promise<BadaviConfig> => {
+export const loadConfig = async (inputDir: string, configPathOverride?: string): Promise<BadaviConfig> => {
     const configPath = configPathOverride
         ? path.resolve(configPathOverride) // Use override if provided
-        : path.resolve(process.cwd(), 'badavi-config.json'); // Default to CWD
+        : path.resolve(inputDir, 'badavi-config.json'); // Default to input directory
 
     let userConfig: Partial<BadaviConfig> = {};
 
@@ -76,13 +77,13 @@ export const loadConfig = async (configPathOverride?: string): Promise<BadaviCon
             userConfig = JSON.parse(configContent);
             console.log(`Loaded configuration from ${configPath}`);
         } else {
-            // Only log "not found" if the default path was used and it doesn't exist.
-            // If an override path was given and it doesn't exist, it's more like an error.
-            if (!configPathOverride) {
-                console.log('Default badavi-config.json not found in CWD, using default settings.');
-            } else {
+            // If an override path was given and it doesn't exist, it's an error.
+            if (configPathOverride) {
                  // Throw an error if a specific config path was provided but not found
                  throw new Error(`Configuration file not found at specified path: ${configPath}`);
+            } else {
+                 // Otherwise, it's okay if the default wasn't found, just log and use defaults.
+                console.log(`Default badavi-config.json not found in input directory (${inputDir}), using default settings.`);
             }
         }
     } catch (error: any) {
@@ -102,9 +103,9 @@ export const loadConfig = async (configPathOverride?: string): Promise<BadaviCon
     };
 
     // Validate config structure slightly (can be expanded)
-    if (typeof finalConfig.defaultLanguage !== 'string') {
-        console.warn('Warning: Invalid defaultLanguage in config, using default.');
-        finalConfig.defaultLanguage = DEFAULT_CONFIG.defaultLanguage;
+    if (typeof finalConfig.defaultLanguageCodeIso639_2letter !== 'string' || finalConfig.defaultLanguageCodeIso639_2letter.length !== 2) {
+        console.warn(`Warning: Invalid defaultLanguageCodeIso639_2letter in config (must be a 2-letter string), using default '${DEFAULT_CONFIG.defaultLanguageCodeIso639_2letter}'.`);
+        finalConfig.defaultLanguageCodeIso639_2letter = DEFAULT_CONFIG.defaultLanguageCodeIso639_2letter;
     }
     if (!['ltr', 'rtl'].includes(finalConfig.defaultDirection)) {
         console.warn('Warning: Invalid defaultDirection in config, using default.');

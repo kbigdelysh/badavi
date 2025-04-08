@@ -1,4 +1,4 @@
-# badavi
+# Badavi
 
 A tool that converts a collection of markdown files (with interlinking URLs) into a minimalistic static website.
 
@@ -8,9 +8,9 @@ A tool that converts a collection of markdown files (with interlinking URLs) int
 
 * Properly converts markdown in left-to-right (LTR) and right-to-left (RTL) languages to HTML.
 * Detects language (e.g., Persian, Arabic) to set appropriate `lang` and `dir="rtl"` attributes in HTML.
+* 
 
 ## Prerequisites
-
 * [Node.js](https://nodejs.org/) (Version 16 or higher recommended for full ES Module support)
 * [Pandoc](https://pandoc.org/installing.html) (must be installed and accessible in your system's PATH)
 
@@ -28,6 +28,10 @@ A tool that converts a collection of markdown files (with interlinking URLs) int
     ```bash
     npm install
     ```
+
+## Input File Requirements
+
+* **Linking:** If your markdown files have interlinking URLs, their links **must** be relative to each file's location for the conversion to work correctly. For example, if a file is located in `./source-docs/chapter1/section1.md` and the second file is located in `./source-docs/chapter2/section2.md`, the link to the second file from the first file should be `../chapter2/section2.md`.
 
 ## Building the Project
 
@@ -97,20 +101,22 @@ Example `badavi-config.json`:
 
 ```json
 {
-  "defaultLanguage": "en", // For Persian, use "fa", for Arabic, use "ar".
+  "defaultLanguageCodeIso639_2letter": "en", // E.g., "en", "fa", "ar". Must be 2 letters.
   "defaultDirection": "ltr", // "ltr" for left-to-right, "rtl" for right-to-left.
   "cssPath": "styles/main.css", // Path to a CSS file to include in the HTML `<head>`.
   "pandocPath": "C:/Program Files/Pandoc/pandoc.exe" // Path to the Pandoc executable.
 }
 ```
 
+**Note:** In the example above, you should remove the comments before using the `badavi-config.json` file. I have provided an example badavi-config.json file in the root of the repository named `badavi-config.json.example`.
+
 **Configuration Options:**
 
-*   `defaultLanguage` (string, required): Fallback language code (e.g., "en", "fa") used if detection fails.
+*   `defaultLanguageCodeIso639_2letter` (string, required): Fallback 2-letter language code (ISO 639-1, e.g., "en", "fa") used if detection fails.
 *   `defaultDirection` ('ltr' | 'rtl', required): Fallback text direction used if detection fails.
 *   `cssPath` (string, optional): Relative path (from where you run `badavi`) to a CSS file to include in the HTML `<head>`.
 *   `pandocArgs` (string[], optional): An array of extra command-line arguments to pass directly to Pandoc (e.g., `["--toc", "--mathjax"]`).
-*   `pandocPath` (string, optional): The full, absolute path to the `pandoc` executable (e.g., `"C:/Program Files/Pandoc/pandoc.exe"` or `"/usr/local/bin/pandoc"`). This is particularly useful on systems (like Windows) where the Pandoc installation directory might not be included in the `PATH` environment variable available to Node.js processes, even if it's available in your interactive terminal.
+*   `pandocPath` (string, optional): The full, absolute path to the `pandoc` executable (e.g., `"C:/Program Files/Pandoc/pandoc.exe"` or `"/usr/local/bin/pandoc"`). This is particularly useful on systems (like Windows) where the Pandoc installation directory might not be included in the `PATH` environment variable available to Node.js processes, even if it's available in your interactive terminal. For Mac and Linux users, remove this option (pandocPath).
 
 ## Running Tests
 

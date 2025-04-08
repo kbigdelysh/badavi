@@ -1,5 +1,5 @@
 export interface BadaviConfig {
-    defaultLanguage: string;
+    defaultLanguageCodeIso639_2letter: string;
     defaultDirection: 'ltr' | 'rtl';
     cssPath?: string; // Optional path to a CSS file to include
     pandocArgs?: string[]; // Optional additional arguments for Pandoc
