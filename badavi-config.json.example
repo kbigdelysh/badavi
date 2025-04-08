@@ -1,0 +1,5 @@
+{
+  "defaultLanguage": "en", 
+  "defaultDirection": "ltr", 
+  "pandocPath": "C:/Program Files/Pandoc/pandoc.exe"
+}

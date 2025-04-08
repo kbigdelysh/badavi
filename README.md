@@ -104,13 +104,15 @@ Example `badavi-config.json`:
 }
 ```
 
+**Note:** In the example above, you should remove the comments before using the `badavi-config.json` file. I have provided an example badavi-config.json file in the root of the repository named `badavi-config.json.example`.
+
 **Configuration Options:**
 
 *   `defaultLanguage` (string, required): Fallback language code (e.g., "en", "fa") used if detection fails.
 *   `defaultDirection` ('ltr' | 'rtl', required): Fallback text direction used if detection fails.
 *   `cssPath` (string, optional): Relative path (from where you run `badavi`) to a CSS file to include in the HTML `<head>`.
 *   `pandocArgs` (string[], optional): An array of extra command-line arguments to pass directly to Pandoc (e.g., `["--toc", "--mathjax"]`).
-*   `pandocPath` (string, optional): The full, absolute path to the `pandoc` executable (e.g., `"C:/Program Files/Pandoc/pandoc.exe"` or `"/usr/local/bin/pandoc"`). This is particularly useful on systems (like Windows) where the Pandoc installation directory might not be included in the `PATH` environment variable available to Node.js processes, even if it's available in your interactive terminal.
+*   `pandocPath` (string, optional): The full, absolute path to the `pandoc` executable (e.g., `"C:/Program Files/Pandoc/pandoc.exe"` or `"/usr/local/bin/pandoc"`). This is particularly useful on systems (like Windows) where the Pandoc installation directory might not be included in the `PATH` environment variable available to Node.js processes, even if it's available in your interactive terminal. For Mac and Linux users, remove this option (pandocPath).
 
 ## Running Tests
 
