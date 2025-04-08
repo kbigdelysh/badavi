@@ -6,28 +6,25 @@ A tool that converts a collection of markdown files (with interlinking URLs) int
 
 ## Features
 
-*   Recursively processes Markdown files (`.md`) in an input directory.
-*   Replicates the input directory structure in the output directory.
-*   Converts Markdown files to HTML using Pandoc.
-*   Fixes internal Markdown links (`[text](path/to/file.md)`) to point to the corresponding HTML files (`<a href="path/to/file.html">text</a>`).
-*   Supports configuration via `badavi-config.json` for defaults (language, direction) and options (CSS, extra Pandoc args).
-*   Detects language (e.g., Persian, Arabic) to set appropriate `lang` and `dir="rtl"` attributes in HTML.
-*   Checks for Pandoc installation before running.
-*   Provides CLI options for input/output directories, version (`--version`), and help (`--help`).
+* Properly converts markdown in left-to-right (LTR) and right-to-left (RTL) languages to HTML.
+* Detects language (e.g., Persian, Arabic) to set appropriate `lang` and `dir="rtl"` attributes in HTML.
 
 ## Prerequisites
 
-*   [Node.js](https://nodejs.org/) (Version 16 or higher recommended for full ES Module support)
-*   [Pandoc](https://pandoc.org/installing.html) (must be installed and accessible in your system's PATH)
+* [Node.js](https://nodejs.org/) (Version 16 or higher recommended for full ES Module support)
+* [Pandoc](https://pandoc.org/installing.html) (must be installed and accessible in your system's PATH)
 
 ## Installation
 
-1.  Clone the repository:
+1. Clone the repository:
+
     ```bash
     git clone <repository-url>
     cd badavi
     ```
-2.  Install dependencies:
+
+2. Install dependencies:
+  
     ```bash
     npm install
     ```
@@ -44,25 +41,29 @@ npm run build
 
 There are a few ways to run the tool after building:
 
-1.  **Using `npm start` (executes the compiled code directly):**
+1. **Using `npm start` (executes the compiled code directly):**
 
     ```bash
     npm start -- <input-folder> [output-folder]
     ```
-    *Note the `--` before the arguments.* 
 
-2.  **Using the global link (if set up):**
+    *Note the `--` before the arguments.*
+
+2. **Using the global link (if set up):**
 
     First, link the package globally (you only need to do this once after cloning/installing):
+
     ```bash
     npm link
     ```
+
     Then you can run the command directly:
+
     ```bash
     badavi <input-folder> [output-folder]
     ```
 
-3.  **Using `node` directly:**
+3. **Using `node` directly:**
 
     ```bash
     node dist/index.js <input-folder> [output-folder]
@@ -99,7 +100,6 @@ Example `badavi-config.json`:
   "defaultLanguage": "en",
   "defaultDirection": "ltr",
   "cssPath": "styles/main.css",
-  "pandocArgs": ["--toc"],
   "pandocPath": "C:/Program Files/Pandoc/pandoc.exe"
 }
 ```
