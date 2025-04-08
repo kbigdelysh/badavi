@@ -97,7 +97,7 @@ Example `badavi-config.json`:
 
 ```json
 {
-  "defaultLanguage": "en", // For Persian, use "fa", for Arabic, use "ar".
+  "defaultLanguageCodeIso639_2letter": "en", // E.g., "en", "fa", "ar". Must be 2 letters.
   "defaultDirection": "ltr", // "ltr" for left-to-right, "rtl" for right-to-left.
   "cssPath": "styles/main.css", // Path to a CSS file to include in the HTML `<head>`.
   "pandocPath": "C:/Program Files/Pandoc/pandoc.exe" // Path to the Pandoc executable.
@@ -108,7 +108,7 @@ Example `badavi-config.json`:
 
 **Configuration Options:**
 
-*   `defaultLanguage` (string, required): Fallback language code (e.g., "en", "fa") used if detection fails.
+*   `defaultLanguageCodeIso639_2letter` (string, required): Fallback 2-letter language code (ISO 639-1, e.g., "en", "fa") used if detection fails.
 *   `defaultDirection` ('ltr' | 'rtl', required): Fallback text direction used if detection fails.
 *   `cssPath` (string, optional): Relative path (from where you run `badavi`) to a CSS file to include in the HTML `<head>`.
 *   `pandocArgs` (string[], optional): An array of extra command-line arguments to pass directly to Pandoc (e.g., `["--toc", "--mathjax"]`).

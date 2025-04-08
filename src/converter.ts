@@ -2,18 +2,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import { execFile } from 'child_process';
 import { franc } from 'franc'; // Use the specific named import
+import * as rtlDetect from 'rtl-detect'; // Import rtl-detect
+import langs from 'langs'; // Correct: Import the default export
 import { BadaviConfig } from './types.js';
-
-// Map ISO 639-3 codes to language tags and RTL status
-// Add more languages as needed
-const languageMap: { [key: string]: { tag: string; rtl: boolean } } = {
-    'pes': { tag: 'fa', rtl: true }, // Persian
-    'arb': { tag: 'ar', rtl: true }, // Standard Arabic
-    'heb': { tag: 'he', rtl: true }, // Hebrew
-    'urd': { tag: 'ur', rtl: true }, // Urdu
-    // Add other RTL languages here
-    // LTR languages will default to LTR
-};
 
 /**
  * Recursively finds all files within a directory.
@@ -72,23 +63,16 @@ const convertMarkdownFile = async (
 
         if (langCode === 'und') {
             // Undetermined: Use defaults from config
-            langTag = config.defaultLanguage;
+            langTag = config.defaultLanguageCodeIso639_2letter;
             direction = config.defaultDirection;
             detectionSource = 'default (undetermined)';
         } else {
-            // Determined: Check if it's a known (RTL) language in our map
-            if (languageMap[langCode]) {
-                langTag = languageMap[langCode].tag;
-                direction = languageMap[langCode].rtl ? 'rtl' : 'ltr';
-                detectionSource = `detected (${langCode} -> ${langTag})`;
-            } else {
-                // Detected, but not in our RTL map -> assume LTR
-                // Use the 3-letter code directly or map common ones if needed
-                // Simple approach: map 'eng' to 'en', otherwise use the code
-                langTag = (langCode === 'eng') ? 'en' : langCode;
-                direction = 'ltr'; // Assume LTR if not in our RTL map
-                detectionSource = `detected (${langCode} -> ${langTag})`;
-            }
+            // Determined: Use rtl-detect for direction and langs for tag mapping
+            const langInfo = langs.where('3', langCode);
+            langTag = langInfo ? (langInfo['1'] || langCode) : langCode; // Use 2-letter code if available, else fall back to 3-letter
+
+            direction = rtlDetect.isRtlLang(langCode) ? 'rtl' : 'ltr';
+            detectionSource = `detected (${langCode} -> ${langTag})`;
         }
 
         console.log(` -> Language: ${langTag} (${direction.toUpperCase()}) [Source: ${detectionSource}]`);

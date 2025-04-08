@@ -5,7 +5,7 @@ import { BadaviConfig } from './types.js';
 
 // Default configuration values
 const DEFAULT_CONFIG: BadaviConfig = {
-    defaultLanguage: 'en',
+    defaultLanguageCodeIso639_2letter: 'en',
     defaultDirection: 'ltr',
 };
 
@@ -103,9 +103,9 @@ export const loadConfig = async (inputDir: string, configPathOverride?: string):
     };
 
     // Validate config structure slightly (can be expanded)
-    if (typeof finalConfig.defaultLanguage !== 'string') {
-        console.warn('Warning: Invalid defaultLanguage in config, using default.');
-        finalConfig.defaultLanguage = DEFAULT_CONFIG.defaultLanguage;
+    if (typeof finalConfig.defaultLanguageCodeIso639_2letter !== 'string' || finalConfig.defaultLanguageCodeIso639_2letter.length !== 2) {
+        console.warn(`Warning: Invalid defaultLanguageCodeIso639_2letter in config (must be a 2-letter string), using default '${DEFAULT_CONFIG.defaultLanguageCodeIso639_2letter}'.`);
+        finalConfig.defaultLanguageCodeIso639_2letter = DEFAULT_CONFIG.defaultLanguageCodeIso639_2letter;
     }
     if (!['ltr', 'rtl'].includes(finalConfig.defaultDirection)) {
         console.warn('Warning: Invalid defaultDirection in config, using default.');
