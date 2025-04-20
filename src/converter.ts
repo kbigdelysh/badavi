@@ -56,24 +56,9 @@ const convertMarkdownFile = async (
         const mdContent = await fs.readFile(inputFile, 'utf8');
 
         // 2. Detect Language and Direction (REVISED LOGIC)
-        const langCode = franc(mdContent, { minLength: 10 }); // ISO 639-3 code
-        let langTag: string;
-        let direction: 'ltr' | 'rtl';
-        let detectionSource: string;
-
-        if (langCode === 'und') {
-            // Undetermined: Use defaults from config
-            langTag = config.defaultLanguageCodeIso639_2letter;
-            direction = config.defaultDirection;
-            detectionSource = 'default (undetermined)';
-        } else {
-            // Determined: Use rtl-detect for direction and langs for tag mapping
-            const langInfo = langs.where('3', langCode);
-            langTag = langInfo ? (langInfo['1'] || langCode) : langCode; // Use 2-letter code if available, else fall back to 3-letter
-
-            direction = rtlDetect.isRtlLang(langCode) ? 'rtl' : 'ltr';
-            detectionSource = `detected (${langCode} -> ${langTag})`;
-        }
+        const langTag: string = config.defaultLanguageCodeIso639_2letter;
+        const direction: 'ltr' | 'rtl' = config.defaultDirection;
+        const detectionSource = 'config enforced'; // Indicate source is config
 
         console.log(` -> Language: ${langTag} (${direction.toUpperCase()}) [Source: ${detectionSource}]`);
 
