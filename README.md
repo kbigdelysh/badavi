@@ -86,7 +86,7 @@ badavi --config path/to/my-custom-config.json ./source-docs ./website-output
 
 **Options:**
 
-*   `-c, --config <path>`: Path to a specific `badavi-config.json` configuration file. If not provided, looks for `badavi-config.json` in the current directory.
+*   `-c, --config <path>`: Path to a specific `badavi-config.json` configuration file. If not provided, looks for `badavi-config.json` in the `<input-folder>`.
 *   `-v, --version`: Display the version number.
 *   `-h, --help`: Display help information.
 
@@ -94,7 +94,7 @@ badavi --config path/to/my-custom-config.json ./source-docs ./website-output
 
 You can configure Badavi by:
 
-1.  Creating a `badavi-config.json` file in the directory where you run the command.
+1.  Creating a `badavi-config.json` file inside the `<input-folder>` you provide to the command.
 2.  Using the `-c` or `--config` option to specify the path to a configuration file.
 
 Example `badavi-config.json`:
